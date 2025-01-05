@@ -11,7 +11,7 @@ module.exports = [
   {
     files: ["**/*.{js,jsx,ts,tsx}"],
     languageOptions: {
-      parser: typescriptEslintParser,
+      parser: typescriptEslintParser
     },
     plugins: {
       react: reactPlugin,
@@ -19,21 +19,18 @@ module.exports = [
       import: importPlugin,
       "react-refresh": reactRefreshPlugin,
       "react-hooks": reactHooksPlugin,
-      prettier: prettierPlugin,
+      prettier: prettierPlugin
     },
     rules: {
       "react-refresh/only-export-components": [
         "warn",
-        { allowConstantExport: true },
-      ],
-      indent: ["error", 2],
-      "react/jsx-indent": ["error", 2],
-      "react/jsx-indent-props": ["error", 2],
+        { allowConstantExport: true }
+      ]
     },
     settings: {
       react: {
-        version: "detect",
-      },
-    },
-  },
+        version: "detect"
+      }
+    }
+  }
 ];

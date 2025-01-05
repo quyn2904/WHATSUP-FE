@@ -13,5 +13,4 @@ if ! echo "$BRANCH" | grep -qE "$REGEX"; then
 fi
 
 pnpm lint-staged
-
 pnpm build
