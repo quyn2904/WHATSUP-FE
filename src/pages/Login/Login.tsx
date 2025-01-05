@@ -3,19 +3,26 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
 import CssBaseline from "@mui/material/CssBaseline";
-import Divider from "@mui/material/Divider";
 import FormControlLabel from "@mui/material/FormControlLabel";
+import Divider from "@mui/material/Divider";
 import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import MuiCard from "@mui/material/Card";
-import Grid from "@mui/material/Grid2";
 import { styled } from "@mui/material/styles";
+import { ForgotPassword } from "./components";
 import { GoogleIcon, FacebookIcon, TextFieldControl } from "../../components";
-import { RegisterRequestType } from "../../apis";
 import { useForm } from "react-hook-form";
+import { authApi, LoginRequestType } from "../../apis";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+import {
+  isAxiosUnprocessableEntityError,
+  isAxiosBadRequestError
+} from "../../utils/error";
+import ERROR_CONSTANTS from "../../constants/error";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -25,18 +32,18 @@ const Card = styled(MuiCard)(({ theme }) => ({
   padding: theme.spacing(4),
   gap: theme.spacing(2),
   margin: "auto",
+  [theme.breakpoints.up("sm")]: {
+    maxWidth: "450px"
+  },
   boxShadow:
     "hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px",
-  [theme.breakpoints.up("sm")]: {
-    width: "500px"
-  },
   ...theme.applyStyles("dark", {
     boxShadow:
       "hsla(220, 30%, 5%, 0.5) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.08) 0px 15px 35px -5px"
   })
 }));
 
-const RegisterContainer = styled(Stack)(({ theme }) => ({
+const LoginContainer = styled(Stack)(({ theme }) => ({
   height: "calc((1 - var(--template-frame-height, 0)) * 100dvh)",
   minHeight: "100%",
   padding: theme.spacing(2),
@@ -59,139 +66,166 @@ const RegisterContainer = styled(Stack)(({ theme }) => ({
   }
 }));
 
-const Register = () => {
-  const { register, formState, getValues } = useForm<RegisterRequestType>({
-    criteriaMode: "all"
+const Login = () => {
+  const { register, formState, getValues, setError, clearErrors } =
+    useForm<LoginRequestType>({
+      criteriaMode: "all"
+    });
+  const [open, setOpen] = React.useState(false);
+
+  const handleClickOpenForgotPassword = () => {
+    setOpen(true);
+  };
+
+  const handleCloseForgotPassword = () => {
+    setOpen(false);
+  };
+
+  const handleLogin = useMutation({
+    mutationFn: (data: LoginRequestType) => authApi.login(data)
   });
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log({ ...getValues() });
+    clearErrors();
+    handleLogin.mutate(
+      { ...getValues() },
+      {
+        onSuccess: () => {
+          toast.success("Login successfully");
+        },
+        onError: (error) => {
+          if (isAxiosUnprocessableEntityError<LoginRequestType>(error)) {
+            const formError = error.response?.data.details;
+            formError?.forEach((err) => {
+              setError(err.property, {
+                message: err.message
+              });
+            });
+          } else if (isAxiosBadRequestError(error)) {
+            const errorCode = error.response?.data.errorCode;
+            if (errorCode && ERROR_CONSTANTS[errorCode]) {
+              toast.error(ERROR_CONSTANTS[errorCode]["en"]);
+            } else {
+              toast.error("Unknown error code");
+            }
+          } else {
+            toast.error("Something went wrong, please try again later");
+          }
+        }
+      }
+    );
   };
 
   return (
     <>
       <CssBaseline enableColorScheme />
-      <RegisterContainer direction="column" justifyContent="space-between">
+      <LoginContainer direction="column" justifyContent="space-between">
         <Card variant="outlined">
           <Typography
             component="h1"
             variant="h4"
             sx={{ width: "100%", fontSize: "clamp(2rem, 10vw, 2.15rem)" }}
           >
-            Sign up
+            Sign in
           </Typography>
           <Box
             component="form"
             onSubmit={handleSubmit}
-            sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+            noValidate
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              width: "100%",
+              gap: 2
+            }}
           >
-            <Grid container size={12} spacing={3}>
-              <Grid size={{ lg: 6, md: 6, xs: 12 }}>
-                <FormControl fullWidth>
-                  <FormLabel htmlFor="first_name">First Name</FormLabel>
-                  <TextFieldControl<RegisterRequestType>
-                    register={register}
-                    required
-                    fullWidth
-                    id="first_name"
-                    placeholder="Joe"
-                    name="first_name"
-                    autoComplete="firt_name"
-                    variant="outlined"
-                    error={formState.errors.first_name}
-                  />
-                </FormControl>
-              </Grid>
-              <Grid size={{ lg: 6, md: 6, xs: 12 }}>
-                <FormControl fullWidth>
-                  <FormLabel htmlFor="last_name">Last Name</FormLabel>
-                  <TextFieldControl<RegisterRequestType>
-                    register={register}
-                    required
-                    fullWidth
-                    id="last_name"
-                    placeholder="Biden"
-                    name="last_name"
-                    autoComplete="last_name"
-                    variant="outlined"
-                    error={formState.errors.last_name}
-                  />
-                </FormControl>
-              </Grid>
-            </Grid>
             <FormControl>
               <FormLabel htmlFor="email">Email</FormLabel>
-              <TextFieldControl<RegisterRequestType>
+              <TextFieldControl<LoginRequestType>
                 register={register}
+                id="email"
+                type="email"
+                name="email"
+                placeholder="your@email.com"
+                autoComplete="email"
+                autoFocus
                 required
                 fullWidth
-                id="email"
-                placeholder="your@email.com"
-                name="email"
-                autoComplete="email"
                 variant="outlined"
                 error={formState.errors.email}
               />
             </FormControl>
             <FormControl>
               <FormLabel htmlFor="password">Password</FormLabel>
-              <TextFieldControl<RegisterRequestType>
+              <TextFieldControl
                 register={register}
-                required
-                fullWidth
+                error={formState.errors.password}
                 name="password"
                 placeholder="••••••"
                 type="password"
                 id="password"
-                autoComplete="new-password"
+                autoComplete="current-password"
+                autoFocus
+                required
+                fullWidth
                 variant="outlined"
-                error={formState.errors.password}
               />
             </FormControl>
             <FormControlLabel
-              control={<Checkbox value="allowExtraEmails" color="primary" />}
-              label="I want to receive updates via email."
+              control={<Checkbox value="remember" color="primary" />}
+              label="Remember me"
+            />
+            <ForgotPassword
+              open={open}
+              handleClose={handleCloseForgotPassword}
             />
             <Button type="submit" fullWidth variant="contained">
-              Sign up
+              Sign in
             </Button>
+            <Link
+              component="button"
+              type="button"
+              onClick={handleClickOpenForgotPassword}
+              variant="body2"
+              sx={{ alignSelf: "center" }}
+            >
+              Forgot your password?
+            </Link>
           </Box>
-          <Divider>
-            <Typography sx={{ color: "text.secondary" }}>or</Typography>
-          </Divider>
+          <Divider>or</Divider>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <Button
               fullWidth
               variant="outlined"
-              onClick={() => alert("Sign up with Google")}
+              onClick={() => alert("Sign in with Google")}
               startIcon={<GoogleIcon />}
             >
-              Sign up with Google
+              Sign in with Google
             </Button>
             <Button
               fullWidth
               variant="outlined"
-              onClick={() => alert("Sign up with Facebook")}
+              onClick={() => alert("Sign in with Facebook")}
               startIcon={<FacebookIcon />}
             >
-              Sign up with Facebook
+              Sign in with Facebook
             </Button>
             <Typography sx={{ textAlign: "center" }}>
-              Already have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link
-                href="/material-ui/getting-started/templates/sign-in/"
+                href="/register"
                 variant="body2"
                 sx={{ alignSelf: "center" }}
               >
-                Sign in
+                Sign up
               </Link>
             </Typography>
           </Box>
         </Card>
-      </RegisterContainer>
+      </LoginContainer>
     </>
   );
 };
 
-export default Register;
+export default Login;

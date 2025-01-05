@@ -3,7 +3,7 @@ import {
   FieldError,
   FieldValues,
   Path,
-  UseFormRegister,
+  UseFormRegister
 } from "react-hook-form";
 
 interface TextFieldControlProps<T extends FieldValues>
