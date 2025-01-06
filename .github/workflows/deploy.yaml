@@ -1,0 +1,31 @@
+name: Deploy Image
+
+on:
+  push:
+    branches:
+      - "main"
+
+env:
+  REGISTRY: docker.io
+  IMAGE_NAME: ${{ github.repository}}
+
+jobs:
+  docker-compose:
+    runs-on: self-hosted
+    steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Docker Compose Up
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: ${{ env.REGISTRY }}/quyenpqwork/whatsup-fe:latest
+
+      - name: Docker stop old container
+        run: docker container stop ${{ github.repository}} || true
+
+      - name: Docker Compose Up
+        run: docker run -d --name ${{ github.repository}} -p 3334:80 --rm portfolio
