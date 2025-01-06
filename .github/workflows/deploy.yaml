@@ -20,7 +20,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Docker stop old container
-        run: docker container stop ${{ github.repository}} || true
+        run: docker container stop whatsup-fe || true
 
       - name: Docker Compose Up
-        run: docker run -d --name ${{ github.repository}} -p 3334:80 --rm ${{ env.REGISTRY }}/quyenpqwork/whatsup-fe:latest
+        run: docker run -d --name whatsup-fe -p 3334:80 --rm ${{ env.REGISTRY }}/quyenpqwork/whatsup-fe:latest
