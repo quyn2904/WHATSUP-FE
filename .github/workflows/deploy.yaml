@@ -19,13 +19,8 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Docker Compose Up
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
-        with:
-          images: ${{ env.REGISTRY }}/quyenpqwork/whatsup-fe:latest
-
       - name: Docker stop old container
         run: docker container stop ${{ github.repository}} || true
 
       - name: Docker Compose Up
-        run: docker run -d --name ${{ github.repository}} -p 3334:80 --rm portfolio
+        run: docker run -d --name ${{ github.repository}} -p 3334:80 --rm ${{ env.REGISTRY }}/quyenpqwork/whatsup-fe:latest
