@@ -27,6 +27,7 @@ import {
   isAxiosBadRequestError
 } from "../../utils/error";
 import ERROR_CONSTANTS from "../../constants/error";
+import { useNavigate } from "react-router-dom";
 
 const LoginContainer = styled(Stack)(({ theme }) => ({
   height: "calc((1 - var(--template-frame-height, 0)) * 100dvh)",
@@ -52,6 +53,7 @@ const LoginContainer = styled(Stack)(({ theme }) => ({
 }));
 
 const Login = () => {
+  const nav = useNavigate();
   const { register, formState, getValues, setError, clearErrors } =
     useForm<LoginRequestType>({
       criteriaMode: "all"
@@ -78,6 +80,7 @@ const Login = () => {
       {
         onSuccess: () => {
           toast.success("Login successfully");
+          nav("/");
         },
         onError: (error) => {
           if (isAxiosUnprocessableEntityError<LoginRequestType>(error)) {

@@ -9,7 +9,7 @@ const prettierPlugin = require("eslint-plugin-prettier");
 
 module.exports = [
   {
-    files: ["**/*.{js,jsx,ts,tsx}"],
+    files: ["src/**/*.{js,jsx,ts,tsx}"],
     languageOptions: {
       parser: typescriptEslintParser
     },

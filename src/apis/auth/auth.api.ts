@@ -1,11 +1,12 @@
 import http from "../../utils/http";
-import { LoginRequestType, RegisterRequestType } from "./auth-request.type";
+import { LoginRequestType, RegisterRequestType } from "./auth-req.type";
+import { LoginResponseType } from "./auth-res.type";
 
 const URL = "auth";
 
 const authApi = {
   login(data: LoginRequestType) {
-    return http.post(`${URL}/login`, data);
+    return http.post<LoginResponseType>(`${URL}/login`, data);
   },
 
   register(data: RegisterRequestType) {
