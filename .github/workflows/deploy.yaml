@@ -23,4 +23,4 @@ jobs:
         run: docker container stop whatsup-fe || true
 
       - name: Docker Compose Up
-        run: docker run -d --name whatsup-fe -p 3334:80 --rm ${{ env.REGISTRY }}/quyenpqwork/whatsup-fe:latest
+        run: docker run -d --name whatsup-fe -p 3334:80 --rm --pull ${{ env.REGISTRY }}/quyenpqwork/whatsup-fe:latest
