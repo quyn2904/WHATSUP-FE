@@ -8,4 +8,9 @@ interface RegisterRequestType extends LoginRequestType {
   last_name: string;
 }
 
-export type { LoginRequestType, RegisterRequestType };
+interface ResetPasswordType {
+  password: string;
+  token: string;
+}
+
+export type { LoginRequestType, RegisterRequestType, ResetPasswordType };

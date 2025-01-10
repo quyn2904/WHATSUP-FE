@@ -1,7 +1,11 @@
 const ERROR_CONSTANTS = {
   E002: {
-    vi: "Tài khoảng không tồn tại",
+    vi: "Tài khoản không tồn tại",
     en: "Account not found"
+  },
+  E003: {
+    vi: "Tài khoản đã tồn tại",
+    en: "Account already exists"
   }
 } as const;
 

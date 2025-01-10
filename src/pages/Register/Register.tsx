@@ -10,34 +10,26 @@ import FormControl from "@mui/material/FormControl";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
-import MuiCard from "@mui/material/Card";
 import Grid from "@mui/material/Grid2";
 import { styled } from "@mui/material/styles";
-import { GoogleIcon, FacebookIcon, TextFieldControl } from "../../components";
-import { RegisterRequestType } from "../../apis";
+import {
+  GoogleIcon,
+  FacebookIcon,
+  TextFieldControl,
+  Card
+} from "../../components";
+import { authApi, RegisterRequestType } from "../../apis";
 import { useForm } from "react-hook-form";
-
-const Card = styled(MuiCard)(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  alignSelf: "center",
-  width: "100%",
-  padding: theme.spacing(4),
-  gap: theme.spacing(2),
-  margin: "auto",
-  boxShadow:
-    "hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px",
-  [theme.breakpoints.up("sm")]: {
-    width: "500px"
-  },
-  ...theme.applyStyles("dark", {
-    boxShadow:
-      "hsla(220, 30%, 5%, 0.5) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.08) 0px 15px 35px -5px"
-  })
-}));
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import {
+  isAxiosBadRequestError,
+  isAxiosUnprocessableEntityError
+} from "../../utils/error";
+import ERROR_CONSTANTS from "../../constants/error";
 
 const RegisterContainer = styled(Stack)(({ theme }) => ({
-  height: "calc((1 - var(--template-frame-height, 0)) * 100dvh)",
   minHeight: "100%",
   padding: theme.spacing(2),
   [theme.breakpoints.up("sm")]: {
@@ -60,19 +52,58 @@ const RegisterContainer = styled(Stack)(({ theme }) => ({
 }));
 
 const Register = () => {
-  const { register, formState, getValues } = useForm<RegisterRequestType>({
-    criteriaMode: "all"
+  const nav = useNavigate();
+  const { register, formState, getValues, clearErrors, setError } =
+    useForm<RegisterRequestType>({
+      criteriaMode: "all"
+    });
+
+  const handleRegister = useMutation({
+    mutationFn: (data: RegisterRequestType) => authApi.register(data)
   });
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log({ ...getValues() });
+    clearErrors();
+    handleRegister.mutate(
+      { ...getValues() },
+      {
+        onSuccess: () => {
+          toast.success("Register successfully, please login");
+          nav("/login");
+        },
+        onError: (error) => {
+          if (isAxiosUnprocessableEntityError<RegisterRequestType>(error)) {
+            const formError = error.response?.data.details;
+            formError?.forEach((err) => {
+              setError(err.property, { message: err.message });
+            });
+          } else if (isAxiosBadRequestError(error)) {
+            const errorCode = error.response?.data.errorCode;
+            if (errorCode && ERROR_CONSTANTS[errorCode]) {
+              toast.error(ERROR_CONSTANTS[errorCode]["en"]);
+            } else {
+              toast.error("Unknown error code");
+            }
+          } else {
+            toast.error("Something went wrong, please try again later");
+          }
+        }
+      }
+    );
   };
 
   return (
     <>
       <CssBaseline enableColorScheme />
-      <RegisterContainer direction="column" justifyContent="space-between">
+      <RegisterContainer
+        direction="column"
+        height={{
+          xs: "100vh",
+          sm: "calc((1 - var(--template-frame-height, 0)) * 100dvh)"
+        }}
+        justifyContent="space-between"
+      >
         <Card variant="outlined">
           <Typography
             component="h1"
@@ -84,31 +115,37 @@ const Register = () => {
           <Box
             component="form"
             onSubmit={handleSubmit}
-            sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: { xs: 1, sm: 2 }
+            }}
           >
-            <Grid container size={12} spacing={3}>
-              <Grid size={{ lg: 6, md: 6, xs: 12 }}>
+            <Grid container size={12} spacing={{ xs: 1, sm: 3 }}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <FormControl fullWidth>
                   <FormLabel htmlFor="first_name">First Name</FormLabel>
                   <TextFieldControl<RegisterRequestType>
                     register={register}
+                    size={"small"}
+                    id="first_name"
+                    name="first_name"
+                    placeholder="Joe"
+                    autoComplete="firt_name"
                     required
                     fullWidth
-                    id="first_name"
-                    placeholder="Joe"
-                    name="first_name"
-                    autoComplete="firt_name"
                     variant="outlined"
                     error={formState.errors.first_name}
                   />
                 </FormControl>
               </Grid>
-              <Grid size={{ lg: 6, md: 6, xs: 12 }}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <FormControl fullWidth>
                   <FormLabel htmlFor="last_name">Last Name</FormLabel>
                   <TextFieldControl<RegisterRequestType>
                     register={register}
                     required
+                    size={"small"}
                     fullWidth
                     id="last_name"
                     placeholder="Biden"
@@ -127,6 +164,7 @@ const Register = () => {
                 required
                 fullWidth
                 id="email"
+                size={"small"}
                 placeholder="your@email.com"
                 name="email"
                 autoComplete="email"
@@ -141,6 +179,7 @@ const Register = () => {
                 required
                 fullWidth
                 name="password"
+                size={"small"}
                 placeholder="••••••"
                 type="password"
                 id="password"
@@ -179,11 +218,7 @@ const Register = () => {
             </Button>
             <Typography sx={{ textAlign: "center" }}>
               Already have an account?{" "}
-              <Link
-                href="/material-ui/getting-started/templates/sign-in/"
-                variant="body2"
-                sx={{ alignSelf: "center" }}
-              >
+              <Link href="/login" variant="body2" sx={{ alignSelf: "center" }}>
                 Sign in
               </Link>
             </Typography>

@@ -22,6 +22,7 @@ module.exports = [
       prettier: prettierPlugin
     },
     rules: {
+      "no-console": "error",
       "react-refresh/only-export-components": [
         "warn",
         { allowConstantExport: true }
