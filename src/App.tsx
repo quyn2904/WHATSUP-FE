@@ -6,7 +6,7 @@ function App() {
   return (
     <BrowserRouter>
       <ToastContainer />
-      <AppRouter />;
+      <AppRouter />
     </BrowserRouter>
   );
 }

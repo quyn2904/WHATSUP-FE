@@ -10,10 +10,14 @@ import FormControl from "@mui/material/FormControl";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
-import MuiCard from "@mui/material/Card";
 import { styled } from "@mui/material/styles";
 import { ForgotPassword } from "./components";
-import { GoogleIcon, FacebookIcon, TextFieldControl } from "../../components";
+import {
+  GoogleIcon,
+  FacebookIcon,
+  TextFieldControl,
+  Card
+} from "../../components";
 import { useForm } from "react-hook-form";
 import { authApi, LoginRequestType } from "../../apis";
 import { useMutation } from "@tanstack/react-query";
@@ -23,25 +27,6 @@ import {
   isAxiosBadRequestError
 } from "../../utils/error";
 import ERROR_CONSTANTS from "../../constants/error";
-
-const Card = styled(MuiCard)(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  alignSelf: "center",
-  width: "100%",
-  padding: theme.spacing(4),
-  gap: theme.spacing(2),
-  margin: "auto",
-  [theme.breakpoints.up("sm")]: {
-    maxWidth: "450px"
-  },
-  boxShadow:
-    "hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px",
-  ...theme.applyStyles("dark", {
-    boxShadow:
-      "hsla(220, 30%, 5%, 0.5) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.08) 0px 15px 35px -5px"
-  })
-}));
 
 const LoginContainer = styled(Stack)(({ theme }) => ({
   height: "calc((1 - var(--template-frame-height, 0)) * 100dvh)",
@@ -146,6 +131,7 @@ const Login = () => {
                 register={register}
                 id="email"
                 type="email"
+                size="small"
                 name="email"
                 placeholder="your@email.com"
                 autoComplete="email"
@@ -165,6 +151,7 @@ const Login = () => {
                 placeholder="••••••"
                 type="password"
                 id="password"
+                size="small"
                 autoComplete="current-password"
                 autoFocus
                 required
